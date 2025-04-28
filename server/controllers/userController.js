@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const mongoose = require('mongoose');
+
 
 // Ajouter un manga aux favoris
 exports.addFavorite = async (req, res) => {
@@ -7,12 +9,17 @@ exports.addFavorite = async (req, res) => {
         const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
-        if (!user.favorites.includes(mangaId)) {
-            user.favorites.push({ manga: mangaId });
-            await user.save();
+        const mangaAlreadyExists = user.favorites.find(fav => fav.manga.toString() === mangaId);
+        if (mangaAlreadyExists) {
+            return res.status(400).json({ message: "Manga déjà dans les favoris." });
         }
+
+        user.favorites.push({ manga: new mongoose.Types.ObjectId(mangaId) });
+        await user.save();
+
         res.status(200).json({ message: 'Manga ajouté aux favoris' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Erreur serveur', error: error.message });
     }
 };

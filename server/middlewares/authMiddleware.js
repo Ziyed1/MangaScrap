@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+
+// Middleware qui va attendre un token JWT pour voir si un user est bien co
 const protect = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
