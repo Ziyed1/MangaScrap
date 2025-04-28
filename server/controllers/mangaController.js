@@ -1,49 +1,40 @@
-const Manga = require('../models/Manga');
-const User = require('../models/User');
+const { createManga, getAllMangas } = require('../models/Manga');
+const { uploadCoverImage } = require('../services/uploadService');
+const { v4: uuidv4 } = require('uuid');
 
-// Simuler une recherche de manga
-const searchManga = async (req, res) => {
-  const { title } = req.query;
+exports.createManga = async (req, res) => {
   try {
-    // Rechercher en base
-    const mangas = await Manga.find({ title: { $regex: title, $options: 'i' } });
-    res.json(mangas);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    const { title, description } = req.body;
+    const cover = req.file?.path; 
 
-// Ajouter à mes lectures
-const addFavorite = async (req, res) => {
-  const { username, mangaId } = req.body;
-  try {
-    let user = await User.findOne({ username });
-    if (!user) {
-      user = new User({ username, favorites: [] });
+    if (!cover) {
+      return res.status(400).json({ message: "Image de couverture requise." });
     }
-    if (!user.favorites.includes(mangaId)) {
-      user.favorites.push(mangaId);
-      await user.save();
-    }
-    res.json({ message: 'Manga ajouté à tes lectures !' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    const coverUrl = await uploadCoverImage(cover);
+
+    const mangaData = {
+      mangaId: uuidv4(),
+      title,
+      description,
+      coverUrl,
+    };
+
+    await createManga(mangaData);
+
+    res.status(201).json({ message: "Manga créé avec succès.", manga: mangaData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
-// Voir mes lectures
-const getFavorites = async (req, res) => {
-  const { username } = req.query;
+exports.getMangas = async (req, res) => {
   try {
-    const user = await User.findOne({ username }).populate('favorites');
-    res.json(user.favorites);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const mangas = await getAllMangas();
+    res.status(200).json(mangas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
-};
-
-module.exports = {
-  searchManga,
-  addFavorite,
-  getFavorites
 };

@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { searchManga, addFavorite, getFavorites } = require('../controllers/mangaController');
+const mangaController = require('../controllers/mangaController');
+const multer = require('multer');
 
-// Chercher un manga
-router.get('/search', searchManga);
+const upload = multer({ dest: 'uploads/' }); 
 
-// Ajouter un manga à mes lectures
-router.post('/add', addFavorite);
-
-// Voir mes lectures
-router.get('/favorites', getFavorites);
+router.post('/', upload.single('cover'), mangaController.createManga);
+router.get('/', mangaController.getMangas);
 
 module.exports = router;

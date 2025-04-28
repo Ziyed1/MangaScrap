@@ -1,11 +1,26 @@
-const mongoose = require('mongoose');
+const { GetCommand, PutCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const dynamo = require("../config/dynamo");
 
-const mangaSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String },
-  coverImage: { type: String },
-  status: { type: String, enum: ['En cours', 'Terminé'], default: 'En cours' },
-  chapters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' }],
-}, { timestamps: true });
+const TABLE_NAME = "Mangas";
 
-module.exports = mongoose.model('Manga', mangaSchema);
+exports.createManga = async (mangaData) => {
+  return await dynamo.send(new PutCommand({
+    TableName: TABLE_NAME,
+    Item: mangaData
+  }));
+};
+
+exports.getMangaById = async (mangaId) => {
+  const result = await dynamo.send(new GetCommand({
+    TableName: TABLE_NAME,
+    Key: { mangaId }
+  }));
+  return result.Item;
+};
+
+exports.getAllMangas = async () => {
+  const result = await dynamo.send(new ScanCommand({
+    TableName: TABLE_NAME,
+  }));
+  return result.Items;
+};

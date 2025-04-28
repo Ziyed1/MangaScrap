@@ -1,13 +1,29 @@
-const mongoose = require('mongoose');
+const { GetCommand, PutCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
+const dynamo = require("../config/dynamo");
 
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  favorites: [{
-    manga: { type: mongoose.Schema.Types.ObjectId, ref: 'Manga' },
-    currentChapter: { type: Number, default: 1 }
-}]
-}, { timestamps: true });
+const TABLE_NAME = "Users"; // La table DynamoDB Users
 
-module.exports = mongoose.model('User', userSchema);
+exports.createUser = async (userData) => {
+  return await dynamo.send(new PutCommand({
+    TableName: TABLE_NAME,
+    Item: userData
+  }));
+};
+
+exports.getUserByEmail = async (email) => {
+  return await dynamo.send(new GetCommand({
+    TableName: TABLE_NAME,
+    Key: { email } // clé primaire (ou clé secondaire) selon la table
+  }));
+};
+
+exports.updateUserFavorites = async (email, newFavorites) => {
+  return await dynamo.send(new UpdateCommand({
+    TableName: TABLE_NAME,
+    Key: { email },
+    UpdateExpression: "set favorites = :favs",
+    ExpressionAttributeValues: {
+      ":favs": newFavorites
+    }
+  }));
+};
