@@ -1,7 +1,7 @@
 const { GetCommand, PutCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const dynamo = require("../config/dynamo");
 
-const TABLE_NAME = "Users"; // La table DynamoDB Users
+const TABLE_NAME = "Users"; 
 
 exports.createUser = async (userData) => {
   return await dynamo.send(new PutCommand({
@@ -13,7 +13,7 @@ exports.createUser = async (userData) => {
 exports.getUserByEmail = async (email) => {
   return await dynamo.send(new GetCommand({
     TableName: TABLE_NAME,
-    Key: { email } // clé primaire (ou clé secondaire) selon la table
+    Key: { email } 
   }));
 };
 
