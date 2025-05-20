@@ -2,7 +2,7 @@ resource "aws_iam_role" "lambda_exec_role" {
   name = "lambda_exec_role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version   = "2012-10-17",
     Statement = [
       {
         Action = "sts:AssumeRole",
@@ -21,11 +21,11 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "scrape_manga" {
-  function_name = "scrape_manga"
-  filename      = "${path.module}/../scraper/lambda/scrape_manga.zip"
-  source_code_hash = filebase64sha256("${path.module}/../scraper/lambda/scrape_manga.zip")
-  handler       = "main.lambda_handler"
-  runtime       = "python3.11"
-  role          = aws_iam_role.lambda_exec_role.arn
-  timeout       = 10
+  function_name    = "scrape_manga"
+  filename         = "${path.module}/../scraper/lambda_build/scrape_manga_lambda.zip"
+  source_code_hash = filebase64sha256("${path.module}/../scraper/lambda_build/scrape_manga_lambda.zip")
+  handler          = "main.lambda_handler"
+  runtime          = "python3.11"
+  role             = aws_iam_role.lambda_exec_role.arn
+  timeout          = 10
 }

@@ -64,6 +64,16 @@ resource "aws_iam_policy" "ecs_app_policy" {
           "s3:ListBucket"
         ],
         Resource = "*"
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query"
+        ],
+        Resource: "arn:aws:dynamodb:eu-west-1:739493233403:table/UserManga"
       }
     ]
   })
@@ -94,4 +104,9 @@ resource "aws_iam_policy" "lambda_dynamo_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_dynamo_attach" {
   role       = aws_iam_role.lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_dynamo_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_app_s3_upload_attach" {
+  role       = aws_iam_role.ecs_task_app_role.name
+  policy_arn = aws_iam_policy.s3_upload_policy.arn
 }

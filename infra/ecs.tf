@@ -18,7 +18,7 @@ resource "aws_ecs_task_definition" "mangascrapper" {
   container_definitions = jsonencode([
     {
       name      = "mangascrapper-container"
-      image     = "739493233403.dkr.ecr.eu-west-1.amazonaws.com/mangascrapper-backend"
+      image     = "739493233403.dkr.ecr.eu-west-1.amazonaws.com/mangascrapper-backend:v3"
       essential = true
       portMappings = [
         {
@@ -28,4 +28,22 @@ resource "aws_ecs_task_definition" "mangascrapper" {
       ]
     }
   ])
+}
+
+resource "aws_iam_policy" "s3_upload_policy" {
+  name = "S3UploadPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject"
+        ],
+        Resource = "arn:aws:s3:::mangascrapper-bucket-ziyed/*"
+      }
+    ]
+  })
 }
